@@ -2,12 +2,13 @@ import React from 'react';
 import {BrowserRouter as Router, Link, Route, Routes} from 'react-router-dom';
 import Dashboard from './Dashboard';
 import Home from './Home';
-import Profile from './Profile';
 import Settings from './Settings';
 import Reports from './Reports';
 import Register from "./Register";
 import Login from "./Login";
 import ProtectedRoute from './ProtectedRoute';
+import Farm from "./Farm";
+import Pond from "./Pond";
 
 function App() {
     return (
@@ -19,7 +20,8 @@ function App() {
                     </ProtectedRoute>
                 }>
                     <Route path="home" element={<Home />} />
-                    <Route path="profile" element={<Profile />} />
+                    <Route path="farms" element={<Farm />} />
+                    <Route path="ponds" element={<Pond />} />
                     <Route path="settings" element={<Settings />} />
                     <Route path="reports" element={<Reports />} />
                 </Route>
