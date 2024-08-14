@@ -1,6 +1,17 @@
-.App {
-  text-align: center;
+body, html, #root {
+  height: 100%;
+  margin: 0;
 }
+
+.App {
+  background-image: url('./assets/fish-farm-background.jpg');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  /*height: 100%;*/
+  /*color: white;*/
+}
+
 
 .App-logo {
   height: 40vmin;
