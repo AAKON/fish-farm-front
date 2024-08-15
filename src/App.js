@@ -9,7 +9,9 @@ import Login from "./Login";
 import ProtectedRoute from './ProtectedRoute';
 import Farm from "./Farm";
 import Pond from "./Pond";
-import './App.css'; // Import your CSS file
+import './App.css';
+import Fish from "./Fish";
+import CultureCycle from "./CultureCycle"; // Import your CSS file
 
 function App() {
     return (
@@ -24,6 +26,8 @@ function App() {
                         <Route path="home" element={<Home />} />
                         <Route path="farms" element={<Farm />} />
                         <Route path="ponds" element={<Pond />} />
+                        <Route path="fishes" element={<Fish />} />
+                        <Route path="culture-cycle" element={<CultureCycle />} />
                         <Route path="settings" element={<Settings />} />
                         <Route path="reports" element={<Reports />} />
                     </Route>
