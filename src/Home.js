@@ -1,90 +1,154 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import axios from 'axios';
-import { useTable } from 'react-table';
+import { Bar } from 'react-chartjs-2';
+import {
+    Chart as ChartJS,
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend,
+} from 'chart.js';
+
+ChartJS.register(
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    Title,
+    Tooltip,
+    Legend
+);
 
 function Home() {
-    const [users, setUsers] = useState([]);
+    const [farms, setFarms] = useState([]);
+    const [ponds, setPonds] = useState([]);
+    const [fish, setFish] = useState([]);
+    const [cultureCycles, setCultureCycles] = useState([]);
 
     useEffect(() => {
-        const fetchUsers = async () => {
+        const fetchData = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/users`, {
+                const farmRes = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/farm/all`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                setUsers(response.data);
+                const pondRes = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/pond/all`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const fishRes = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/fish/all`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                const cultureCycleRes = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/culture-cycles`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                setFarms(farmRes.data);
+                setPonds(pondRes.data);
+                setFish(fishRes.data);
+                setCultureCycles(cultureCycleRes.data);
             } catch (error) {
-                console.error('Error fetching users:', error);
+                console.error('Error fetching data:', error);
             }
         };
 
-        fetchUsers();
+        fetchData();
     }, []);
 
-    const columns = useMemo(
-        () => [
-            {
-                Header: 'Name',
-                accessor: 'name', // accessor is the "key" in the data
-            },
-            {
-                Header: 'Email',
-                accessor: 'email',
-            },
-        ],
-        []
-    );
+    // Calculate statistics
+    const totalFarms = farms.length;
+    const totalPonds = ponds.length;
+    const totalFishSpecies = fish.length;
+    const totalCultureCycles = cultureCycles.length;
 
-    const data = useMemo(() => users, [users]);
+    // Prepare data for chart: Number of ponds per farm
+    const pondsPerFarm = useMemo(() => {
+        const farmPondCounts = {};
+        farms.forEach(farm => {
+            farmPondCounts[farm.name] = ponds.filter(pond => pond.farm_id === farm._id).length;
+        });
 
-    const tableInstance = useTable({ columns, data });
+        return {
+            labels: Object.keys(farmPondCounts),
+            datasets: [
+                {
+                    label: 'Number of Ponds per Farm',
+                    data: Object.values(farmPondCounts),
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                },
+            ],
+        };
+    }, [farms, ponds]);
 
-    const {
-        getTableProps,
-        getTableBodyProps,
-        headerGroups,
-        rows,
-        prepareRow,
-    } = tableInstance;
+    // Prepare data for chart: Number of fish species per culture cycle
+    const fishPerCultureCycle = useMemo(() => {
+        const cycleFishCounts = {};
+        cultureCycles.forEach(cycle => {
+            cycleFishCounts[cycle.name] = cycle.fish.length;
+        });
+
+        return {
+            labels: Object.keys(cycleFishCounts),
+            datasets: [
+                {
+                    label: 'Number of Fish Species per Culture Cycle',
+                    data: Object.values(cycleFishCounts),
+                    backgroundColor: 'rgba(153, 102, 255, 0.6)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1,
+                },
+            ],
+        };
+    }, [cultureCycles]);
 
     return (
         <div>
-            <h2 className="text-2xl font-bold mb-4">Users List</h2>
-            <table {...getTableProps()} className="min-w-full bg-white border border-gray-200">
-                <thead>
-                {headerGroups.map(headerGroup => (
-                    <tr {...headerGroup.getHeaderGroupProps()}>
-                        {headerGroup.headers.map(column => (
-                            <th
-                                {...column.getHeaderProps()}
-                                className="px-4 py-2 border-b border-gray-200 text-left text-gray-600"
-                            >
-                                {column.render('Header')}
-                            </th>
-                        ))}
-                    </tr>
-                ))}
-                </thead>
-                <tbody {...getTableBodyProps()}>
-                {rows.map(row => {
-                    prepareRow(row);
-                    return (
-                        <tr {...row.getRowProps()} className="hover:bg-gray-100">
-                            {row.cells.map(cell => (
-                                <td
-                                    {...cell.getCellProps()}
-                                    className="px-4 py-2 border-b border-gray-200"
-                                >
-                                    {cell.render('Cell')}
-                                </td>
-                            ))}
-                        </tr>
-                    );
-                })}
-                </tbody>
-            </table>
+            <h2 className="text-2xl font-bold mb-4">Aquaculture Management Dashboard</h2>
+
+            {/* Summary Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div className="p-4 bg-blue-100 rounded shadow">
+                    <h3 className="text-lg font-semibold">Total Farms</h3>
+                    <p className="text-2xl">{totalFarms}</p>
+                </div>
+                <div className="p-4 bg-green-100 rounded shadow">
+                    <h3 className="text-lg font-semibold">Total Ponds</h3>
+                    <p className="text-2xl">{totalPonds}</p>
+                </div>
+                <div className="p-4 bg-yellow-100 rounded shadow">
+                    <h3 className="text-lg font-semibold">Total Fish Species</h3>
+                    <p className="text-2xl">{totalFishSpecies}</p>
+                </div>
+                <div className="p-4 bg-purple-100 rounded shadow">
+                    <h3 className="text-lg font-semibold">Total Culture Cycles</h3>
+                    <p className="text-2xl">{totalCultureCycles}</p>
+                </div>
+            </div>
+
+            {/* Charts in a row */}
+            <div className="flex flex-col lg:flex-row gap-4 mb-8">
+                {/* Chart: Number of Ponds per Farm */}
+                <div className="flex-1">
+                    <h3 className="text-xl font-semibold mb-4">Number of Ponds per Farm</h3>
+                    <Bar data={pondsPerFarm} />
+                </div>
+
+                {/* Chart: Number of Fish Species per Culture Cycle */}
+                <div className="flex-1">
+                    <h3 className="text-xl font-semibold mb-4">Number of Fish Species per Culture Cycle</h3>
+                    <Bar data={fishPerCultureCycle} />
+                </div>
+            </div>
         </div>
     );
 }
