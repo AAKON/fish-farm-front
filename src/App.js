@@ -11,7 +11,11 @@ import Farm from "./Farm";
 import Pond from "./Pond";
 import './App.css';
 import Fish from "./Fish";
-import CultureCycle from "./CultureCycle"; // Import your CSS file
+import CultureCycle from "./CultureCycle";
+import FeedManagementStock from "./FeedManagementStock";
+import FeedManagementReport from "./FeedManagementReport";
+import Feed from "./Feed";
+import FeedStock from "./FeedStock"; // Import your CSS file
 
 function App() {
     return (
@@ -30,6 +34,10 @@ function App() {
                         <Route path="culture-cycle" element={<CultureCycle />} />
                         <Route path="settings" element={<Settings />} />
                         <Route path="reports" element={<Reports />} />
+                        <Route path="feed" element={<Feed />} />
+                        <Route path="feed-stocks" element={<FeedStock />} />
+                        <Route path="feed-management/stock" element={<FeedManagementStock />} />
+                        <Route path="feed-management/report" element={<FeedManagementReport />} />
                     </Route>
                 </Routes>
                 <nav className="p-4 bg-gray-800 text-white">

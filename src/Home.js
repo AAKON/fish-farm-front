@@ -45,7 +45,7 @@ function Home() {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                const cultureCycleRes = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/culture-cycles`, {
+                const cultureCycleRes = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/culture-cycle/all`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
@@ -72,8 +72,9 @@ function Home() {
     // Prepare data for chart: Number of ponds per farm
     const pondsPerFarm = useMemo(() => {
         const farmPondCounts = {};
+        console.log(ponds);
         farms.forEach(farm => {
-            farmPondCounts[farm.name] = ponds.filter(pond => pond.farm_id === farm._id).length;
+            farmPondCounts[farm.name] = ponds.filter(pond => pond.farm_id._id === farm._id).length;
         });
 
         return {
