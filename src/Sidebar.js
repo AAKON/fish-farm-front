@@ -11,7 +11,7 @@ import {
     faLifeRing,
     faUtensils,
     faChevronDown,
-    faChevronUp, faWorm, faBowlRice
+    faChevronUp, faWorm, faBowlRice, faUniversalAccess
 } from '@fortawesome/free-solid-svg-icons';
 
 function Sidebar() {
@@ -90,6 +90,13 @@ function Sidebar() {
                         label="Fish Feed Stock"
                         isOpen={isOpen}
                         isActive={location.pathname === '/dashboard/feed-stocks'}
+                    />
+                    <SidebarItem
+                        to="/dashboard/access"
+                        icon={faUniversalAccess}
+                        label="Web Access"
+                        isOpen={isOpen}
+                        isActive={location.pathname === '/dashboard/access'}
                     />
 
                     {/* Feed Management with Sub-Menu */}

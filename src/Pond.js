@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Modal from 'react-modal';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faEdit, faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 
-Modal.setAppElement('#root'); // Required for accessibility reasons
+Modal.setAppElement('#root');
 
 function Pond() {
     const [ponds, setPonds] = useState([]);
-    const [farms, setFarms] = useState([]); // New state to store farms data
+    const [farms, setFarms] = useState([]);
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
@@ -47,14 +49,14 @@ function Pond() {
                         Authorization: `Bearer ${token}`,
                     },
                 });
-                setFarms(response.data); // Store the fetched farms
+                setFarms(response.data);
             } catch (error) {
                 console.error('Error fetching farms:', error);
             }
         };
 
         fetchPonds();
-        fetchFarms(); // Fetch farms when the component mounts
+        fetchFarms();
     }, []);
 
     const openModal = () => {
@@ -67,6 +69,11 @@ function Pond() {
             pond_type: '',
             pond_classification: '',
             pond_image: '',
+            pond_shape: '',
+            length: '',
+            width: '',
+            depth: '',
+            circumference: '',
         });
         setModalIsOpen(true);
     };
@@ -74,24 +81,18 @@ function Pond() {
     const openEditModal = (pond) => {
         setIsEditing(true);
 
-        // Safely access pond_meta or default to an empty object
         const pondMeta = pond.pond_meta || {};
-
-        const formData = {
+        setFormData({
             ...pond,
-            farm_id: pond.farm_id._id || pond.farm_id, // Ensure farm_id is correctly set for the dropdown
+            farm_id: pond.farm_id._id || pond.farm_id,
             pond_shape: pondMeta.pond_shape || '',
             length: pondMeta.length || '',
             width: pondMeta.width || '',
             depth: pondMeta.depth || '',
             circumference: pondMeta.circumference || ''
-        };
-
-        setFormData(formData);
+        });
         setModalIsOpen(true);
     };
-
-
 
     const closeModal = () => {
         setModalIsOpen(false);
@@ -100,25 +101,19 @@ function Pond() {
     const handleChange = (e) => {
         const { name, value } = e.target;
 
-        // Update the formData state
         setFormData(prevState => {
             const newState = { ...prevState, [name]: value };
 
-            // Prepare the pond_meta object
             newState.pond_meta = {
                 pond_shape: newState.pond_shape,
             };
 
-            // Calculate the pond size and update pond_meta based on the shape
             if (newState.pond_shape === 'rectangle') {
                 const length = parseFloat(newState.length) || 0;
                 const width = parseFloat(newState.width) || 0;
                 const depth = parseFloat(newState.depth) || 0;
 
-                // Pond size = length * width * depth
                 newState.pond_size = length * width * depth;
-
-                // Update pond_meta with rectangular dimensions
                 newState.pond_meta.length = length;
                 newState.pond_meta.width = width;
                 newState.pond_meta.depth = depth;
@@ -127,13 +122,9 @@ function Pond() {
                 const circumference = parseFloat(newState.circumference) || 0;
                 const depth = parseFloat(newState.depth) || 0;
 
-                // Calculate radius from circumference: C = 2 * π * r => r = C / (2 * π)
                 const radius = circumference / (2 * Math.PI);
-
-                // Pond size = π * r^2 * depth (volume of a cylinder)
                 newState.pond_size = Math.PI * Math.pow(radius, 2) * depth;
 
-                // Update pond_meta with rounded dimensions
                 newState.pond_meta.circumference = circumference;
                 newState.pond_meta.depth = depth;
             }
@@ -142,22 +133,18 @@ function Pond() {
         });
     };
 
-
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem('token');
 
         try {
             if (isEditing) {
-                // Update existing pond
                 await axios.put(`${process.env.REACT_APP_BASE_URL}/api/pond/${formData._id}`, formData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
             } else {
-                // Create new pond
                 await axios.post(`${process.env.REACT_APP_BASE_URL}/api/pond/create`, formData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -165,7 +152,6 @@ function Pond() {
                 });
             }
             closeModal();
-            // Refresh the pond list after creating/updating
             const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/pond/all`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -181,36 +167,39 @@ function Pond() {
         <div>
             <h2 className="text-2xl font-bold mb-4">Pond List</h2>
             <button onClick={openModal} className="mb-4 bg-blue-500 text-white px-4 py-2 rounded">
+                <FontAwesomeIcon icon={faPlus} className="mr-2" />
                 Add Pond
             </button>
 
             {ponds.length > 0 ? (
-                <table className="min-w-full bg-white border border-gray-200">
-                    <thead>
-                    <tr>
-                        <th className="px-4 py-2 border-b border-gray-200 text-left text-gray-600">Name</th>
-                        <th className="px-4 py-2 border-b border-gray-200 text-left text-gray-600">Pond Size</th>
-                        <th className="px-4 py-2 border-b border-gray-200 text-left text-gray-600">Pond Type</th>
-                        <th className="px-4 py-2 border-b border-gray-200 text-left text-gray-600">Classification</th>
-                        <th className="px-4 py-2 border-b border-gray-200 text-left text-gray-600">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {ponds.map((pond) => (
-                        <tr key={pond._id} className="hover:bg-gray-100">
-                            <td className="px-4 py-2 border-b border-gray-200">{pond.name}</td>
-                            <td className="px-4 py-2 border-b border-gray-200">{pond.pond_size}</td>
-                            <td className="px-4 py-2 border-b border-gray-200">{pond.pond_type}</td>
-                            <td className="px-4 py-2 border-b border-gray-200">{pond.pond_classification}</td>
-                            <td className="px-4 py-2 border-b border-gray-200">
-                                <button onClick={() => openEditModal(pond)} className="text-blue-500 hover:underline">
-                                    Edit
-                                </button>
-                            </td>
+                <div className="overflow-x-auto bg-white shadow-md rounded-lg">
+                    <table className="min-w-full bg-white border border-gray-200">
+                        <thead className="bg-blue-500 text-white">
+                        <tr>
+                            <th className="px-4 py-2 border-b border-gray-200 text-left text-sm font-medium">Name</th>
+                            <th className="px-4 py-2 border-b border-gray-200 text-left text-sm font-medium">Pond Size</th>
+                            <th className="px-4 py-2 border-b border-gray-200 text-left text-sm font-medium">Pond Type</th>
+                            <th className="px-4 py-2 border-b border-gray-200 text-left text-sm font-medium">Classification</th>
+                            <th className="px-4 py-2 border-b border-gray-200 text-left text-sm font-medium">Actions</th>
                         </tr>
-                    ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200 bg-gray-50">
+                        {ponds.map((pond, index) => (
+                            <tr key={pond._id} className={`hover:bg-gray-100 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-100'}`}>
+                                <td className="px-4 py-2 border-b border-gray-200">{pond.name}</td>
+                                <td className="px-4 py-2 border-b border-gray-200">{pond.pond_size}</td>
+                                <td className="px-4 py-2 border-b border-gray-200">{pond.pond_type}</td>
+                                <td className="px-4 py-2 border-b border-gray-200">{pond.pond_classification}</td>
+                                <td className="px-4 py-2 border-b border-gray-200">
+                                    <button onClick={() => openEditModal(pond)} className="text-blue-500 hover:text-blue-700">
+                                        <FontAwesomeIcon icon={faEdit} className="mr-1" /> Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
             ) : (
                 <p>No ponds found.</p>
             )}
@@ -219,7 +208,7 @@ function Pond() {
                 isOpen={modalIsOpen}
                 onRequestClose={closeModal}
                 contentLabel={isEditing ? 'Edit Pond' : 'Add Pond'}
-                className="bg-white p-8 rounded shadow-lg w-3/4 max-w-4xl mx-auto overflow-y-auto"
+                className="bg-white p-8 rounded shadow-lg w-3/4 max-w-4xl mx-auto"
                 overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
             >
                 <h2 className="text-2xl mb-4">{isEditing ? 'Edit Pond' : 'Add Pond'}</h2>
@@ -236,8 +225,24 @@ function Pond() {
                                 required
                             />
                         </div>
+                        <div className="mb-4">
+                            <label className="block text-gray-700 mb-2">Farm</label>
+                            <select
+                                name="farm_id"
+                                value={formData.farm_id}
+                                onChange={handleChange}
+                                className="w-full p-2 border border-gray-900 rounded"
+                                required
+                            >
+                                <option value="">Select Farm</option>
+                                {farms.map(farm => (
+                                    <option key={farm._id} value={farm._id}>
+                                        {farm.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
-                        {/* Pond Shape and Pond Size in the same row */}
                         <div className="mb-4 flex space-x-4">
                             <div className="flex-1">
                                 <label className="block text-gray-700 mb-2">Pond Shape</label>
@@ -266,7 +271,6 @@ function Pond() {
                             </div>
                         </div>
 
-                        {/* Length, Width, Depth in the same row */}
                         {formData.pond_shape === 'rectangle' && (
                             <div className="mb-4 flex space-x-4">
                                 <div className="flex-1">
@@ -305,7 +309,6 @@ function Pond() {
                             </div>
                         )}
 
-                        {/* Circumference and Depth in the same row */}
                         {formData.pond_shape === 'rounded' && (
                             <div className="mb-4 flex space-x-4">
                                 <div className="flex-1">
@@ -334,24 +337,6 @@ function Pond() {
                         )}
 
                         <div className="mb-4">
-                            <label className="block text-gray-700 mb-2">Farm</label>
-                            <select
-                                name="farm_id"
-                                value={formData.farm_id}
-                                onChange={handleChange}
-                                className="w-full p-2 border border-gray-900 rounded"
-                                required
-                            >
-                                <option value="">Select Farm</option>
-                                {farms.map(farm => (
-                                    <option key={farm._id} value={farm._id}>
-                                        {farm.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-
-                        <div className="mb-4">
                             <label className="block text-gray-700 mb-2">Pond Type</label>
                             <select
                                 name="pond_type"
@@ -366,6 +351,7 @@ function Pond() {
                                 <option value="service">Service</option>
                             </select>
                         </div>
+
                         <div className="mb-4">
                             <label className="block text-gray-700 mb-2">Pond Classification</label>
                             <select
@@ -393,25 +379,24 @@ function Pond() {
                             />
                         </div>
                     </div>
-                    <div className="mt-4">
+                    <div className="mt-4 flex justify-end">
                         <button
                             type="submit"
-                            className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+                            className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-6 py-3 rounded-lg shadow-lg hover:from-green-500 hover:to-blue-600 transition-all duration-300 ease-in-out"
                         >
                             {isEditing ? 'Update Pond' : 'Add Pond'}
                         </button>
                         <button
                             type="button"
                             onClick={closeModal}
-                            className="ml-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
+                            className="ml-4 bg-gradient-to-r from-gray-400 to-gray-600 text-white px-6 py-3 rounded-lg shadow-lg hover:from-gray-500 hover:to-gray-700 transition-all duration-300 ease-in-out"
                         >
+                            <FontAwesomeIcon icon={faTimes} className="mr-2" />
                             Cancel
                         </button>
                     </div>
                 </form>
             </Modal>
-
-
         </div>
     );
 }

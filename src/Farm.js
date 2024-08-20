@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Modal from 'react-modal';
+import {faEdit} from "@fortawesome/free-solid-svg-icons";
+import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 
 Modal.setAppElement('#root'); // Required for accessibility reasons
 
@@ -52,9 +54,7 @@ function Farm() {
         setModalIsOpen(true);
     };
 
-    const closeModal = () => {
-        setModalIsOpen(false);
-    };
+    const closeModal = () => setModalIsOpen(false);
 
     const handleChange = (e) => {
         setFormData({
@@ -69,14 +69,12 @@ function Farm() {
 
         try {
             if (isEditing) {
-                // Update existing farm
                 await axios.put(`${process.env.REACT_APP_BASE_URL}/api/farm/${formData._id}`, formData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
             } else {
-                // Create new farm
                 await axios.post(`${process.env.REACT_APP_BASE_URL}/api/farm/create`, formData, {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -84,7 +82,6 @@ function Farm() {
                 });
             }
             closeModal();
-            // Refresh the farm list after creating/updating
             const response = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/farm/all`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -97,122 +94,133 @@ function Farm() {
     };
 
     return (
-        <div>
-            <h2 className="text-2xl font-bold mb-4">Farm List</h2>
-            <button onClick={openModal} className="mb-4 bg-blue-500 text-white px-4 py-2 rounded">
+        <div className="container mx-auto p-6">
+            <h2 className="text-3xl font-bold mb-6 text-gray-800">Farm Management</h2>
+            <button
+                onClick={openModal}
+                className="mb-6 bg-gradient-to-r from-blue-500 to-green-500 text-white px-6 py-3 rounded-full shadow-lg hover:from-green-500 hover:to-blue-500 transition ease-in-out duration-300"
+            >
                 Add Farm
             </button>
 
             {farms.length > 0 ? (
-                <table className="min-w-full bg-white border border-gray-200">
-                    <thead>
-                    <tr>
-                        <th className="px-4 py-2 border-b border-gray-200 text-left text-gray-600">Name</th>
-                        <th className="px-4 py-2 border-b border-gray-200 text-left text-gray-600">Location</th>
-                        <th className="px-4 py-2 border-b border-gray-200 text-left text-gray-600">Area Size</th>
-                        <th className="px-4 py-2 border-b border-gray-200 text-left text-gray-600">Number of Ponds</th>
-                        <th className="px-4 py-2 border-b border-gray-200 text-left text-gray-600">Production Capacity</th>
-                        <th className="px-4 py-2 border-b border-gray-200 text-left text-gray-600">Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {farms.map((farm) => (
-                        <tr key={farm._id} className="hover:bg-gray-100">
-                            <td className="px-4 py-2 border-b border-gray-200">{farm.name}</td>
-                            <td className="px-4 py-2 border-b border-gray-200">{farm.location}</td>
-                            <td className="px-4 py-2 border-b border-gray-200">{farm.area_size}</td>
-                            <td className="px-4 py-2 border-b border-gray-200">{farm.number_of_pond}</td>
-                            <td className="px-4 py-2 border-b border-gray-200">{farm.production_capacity}</td>
-                            <td className="px-4 py-2 border-b border-gray-200">
-                                <button onClick={() => openEditModal(farm)} className="text-blue-500 hover:underline">
-                                    Edit
-                                </button>
-                            </td>
+                <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white shadow-lg rounded-lg">
+                        <thead className="bg-gradient-to-r from-blue-500 to-purple-600 text-white">
+                        <tr>
+                            <th className="py-3 px-6 text-left text-sm font-medium uppercase tracking-wider">Name</th>
+                            <th className="py-3 px-6 text-left text-sm font-medium uppercase tracking-wider">Location</th>
+                            <th className="py-3 px-6 text-left text-sm font-medium uppercase tracking-wider">Area Size</th>
+                            <th className="py-3 px-6 text-left text-sm font-medium uppercase tracking-wider">Number of Ponds</th>
+                            <th className="py-3 px-6 text-left text-sm font-medium uppercase tracking-wider">Production Capacity</th>
+                            <th className="py-3 px-6 text-left text-sm font-medium uppercase tracking-wider">Actions</th>
                         </tr>
-                    ))}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                        {farms.map((farm) => (
+                            <tr key={farm._id} className="hover:bg-gray-100">
+                                <td className="py-4 px-6 text-gray-800 font-medium">{farm.name}</td>
+                                <td className="py-4 px-6 text-gray-800">{farm.location}</td>
+                                <td className="py-4 px-6 text-gray-800">{farm.area_size}</td>
+                                <td className="py-4 px-6 text-gray-800">{farm.number_of_pond}</td>
+                                <td className="py-4 px-6 text-gray-800">{farm.production_capacity}</td>
+                                <td className="px-4 py-2 border-b border-gray-200">
+                                    <button
+                                        onClick={() => openEditModal(farm)}
+                                        className="flex items-center justify-center bg-gradient-to-r from-teal-400 to-blue-500 text-white px-4 py-2 rounded-full shadow-lg hover:from-blue-500 hover:to-teal-400 transform hover:scale-105 transition-transform duration-300 ease-in-out"
+                                    >
+                                        <FontAwesomeIcon icon={faEdit} className="mr-2"/>
+                                        Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
             ) : (
-                <p>No farms found.</p>
+                <p className="text-gray-600 mt-6">No farms found. Start by adding a new farm.</p>
             )}
 
             <Modal
                 isOpen={modalIsOpen}
                 onRequestClose={closeModal}
                 contentLabel={isEditing ? 'Edit Farm' : 'Add Farm'}
-                className="bg-white p-8 rounded shadow-lg w-3/4 max-w-4xl mx-auto"  // Adjust width here
+                className="bg-white p-8 rounded-lg shadow-xl w-full max-w-3xl mx-auto"
                 overlayClassName="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center"
             >
-                <h2 className="text-2xl mb-4">{isEditing ? 'Edit Farm' : 'Add Farm'}</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 mb-2">Name</label>
+                <h2 className="text-2xl font-semibold mb-6">{isEditing ? 'Edit Farm' : 'Add Farm'}</h2>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-gray-700 font-medium mb-2">Name</label>
                         <input
                             type="text"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full p-2 border border-gray-900 rounded"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required
                         />
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 mb-2">Location</label>
+                    <div>
+                        <label className="block text-gray-700 font-medium mb-2">Location</label>
                         <input
                             type="text"
                             name="location"
                             value={formData.location}
                             onChange={handleChange}
-                            className="w-full p-2 border border-gray-900 rounded"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required
                         />
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 mb-2">Area Size</label>
+                    <div>
+                        <label className="block text-gray-700 font-medium mb-2">Area Size</label>
                         <input
                             type="number"
                             name="area_size"
                             value={formData.area_size}
                             onChange={handleChange}
-                            className="w-full p-2 border border-gray-900 rounded"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required
                         />
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 mb-2">Number of Ponds</label>
+                    <div>
+                        <label className="block text-gray-700 font-medium mb-2">Number of Ponds</label>
                         <input
                             type="number"
                             name="number_of_pond"
                             value={formData.number_of_pond}
                             onChange={handleChange}
-                            className="w-full p-2 border border-gray-900 rounded"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required
                         />
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700 mb-2">Production Capacity</label>
+                    <div>
+                        <label className="block text-gray-700 font-medium mb-2">Production Capacity</label>
                         <input
                             type="text"
                             name="production_capacity"
                             value={formData.production_capacity}
                             onChange={handleChange}
-                            className="w-full p-2 border border-gray-900 rounded"
+                            className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                             required
                         />
                     </div>
-                    <button
-                        type="submit"
-                        className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-                    >
-                        {isEditing ? 'Update Farm' : 'Add Farm'}
-                    </button>
-                    <button
-                        type="button"
-                        onClick={closeModal}
-                        className="ml-4 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600"
-                    >
-                        Cancel
-                    </button>
+                    <div className="flex justify-end space-x-4">
+                        <button
+                            type="button"
+                            onClick={closeModal}
+                            className="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition ease-in-out duration-200"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="submit"
+                            className="bg-gradient-to-r from-blue-500 to-green-500 text-white px-4 py-2 rounded-lg shadow-lg hover:from-green-500 hover:to-blue-500 transition ease-in-out duration-200"
+                        >
+                            {isEditing ? 'Update Farm' : 'Add Farm'}
+                        </button>
+                    </div>
                 </form>
             </Modal>
         </div>

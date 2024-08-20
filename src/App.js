@@ -15,7 +15,8 @@ import CultureCycle from "./CultureCycle";
 import FeedManagementStock from "./FeedManagementStock";
 import FeedManagementReport from "./FeedManagementReport";
 import Feed from "./Feed";
-import FeedStock from "./FeedStock"; // Import your CSS file
+import FeedStock from "./FeedStock";
+import RolePermissionPage from "./RolePermissionPage"; // Import your CSS file
 
 function App() {
     return (
@@ -38,6 +39,7 @@ function App() {
                         <Route path="feed-stocks" element={<FeedStock />} />
                         <Route path="feed-management/stock" element={<FeedManagementStock />} />
                         <Route path="feed-management/report" element={<FeedManagementReport />} />
+                        <Route path="access" element={<RolePermissionPage  />} />
                     </Route>
                 </Routes>
                 <nav className="p-4 bg-gray-800 text-white">
