@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Modal from 'react-modal';
-import DeleteConfirmationModal from './DeleteConfirmationModal'; // Import the custom delete modal
+import { ToastContainer, toast } from 'react-toastify';
+import DeleteConfirmationModal from './DeleteConfirmationModal';
+import 'react-toastify/dist/ReactToastify.css';
 
 Modal.setAppElement('#root');
 
@@ -19,16 +21,18 @@ function RolePermissionManagement() {
         const fetchRolesAndPermissions = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const rolesResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/access/roles/all`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const permissionsResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/access/permissions`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
+                const [rolesResponse, permissionsResponse] = await Promise.all([
+                    axios.get(`${process.env.REACT_APP_BASE_URL}/api/access/roles/all`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                    axios.get(`${process.env.REACT_APP_BASE_URL}/api/access/permissions`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                ]);
                 setRoles(rolesResponse.data);
                 setPermissions(permissionsResponse.data);
             } catch (error) {
-                console.error('Error fetching roles and permissions:', error);
+                toast.error('Error fetching roles and permissions');
             }
         };
 
@@ -72,8 +76,9 @@ function RolePermissionManagement() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setRoles(roles.filter(role => role._id !== roleToDelete._id));
+                toast.success('Role deleted successfully');
             } catch (error) {
-                console.error('Error deleting role:', error);
+                toast.error('Error deleting role');
             } finally {
                 setShowDeleteModal(false);
                 setRoleToDelete(null);
@@ -90,10 +95,12 @@ function RolePermissionManagement() {
                 await axios.put(`${process.env.REACT_APP_BASE_URL}/api/access/roles/${formData._id}`, { ...formData, permissions: selectedPermissions }, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
+                toast.success('Role updated successfully');
             } else {
                 await axios.post(`${process.env.REACT_APP_BASE_URL}/api/access/roles/create`, { ...formData, permissions: selectedPermissions }, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
+                toast.success('Role created successfully');
             }
             closeModal();
             const rolesResponse = await axios.get(`${process.env.REACT_APP_BASE_URL}/api/access/roles/all`, {
@@ -101,7 +108,7 @@ function RolePermissionManagement() {
             });
             setRoles(rolesResponse.data);
         } catch (error) {
-            console.error('Error saving role:', error);
+            toast.error('Error saving role');
         }
     };
 
@@ -221,6 +228,8 @@ function RolePermissionManagement() {
                 onConfirm={handleDeleteConfirm}
                 roleName={roleToDelete ? roleToDelete.name.replace(/_/g, ' ') : ''}
             />
+
+            <ToastContainer />
         </div>
     );
 }
