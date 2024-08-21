@@ -11,7 +11,7 @@ import {
     faLifeRing,
     faUtensils,
     faChevronDown,
-    faChevronUp, faWorm, faBowlRice, faUniversalAccess
+    faChevronUp, faWorm, faBowlRice, faUniversalAccess, faPerson
 } from '@fortawesome/free-solid-svg-icons';
 
 function Sidebar() {
@@ -97,6 +97,13 @@ function Sidebar() {
                         label="Web Access"
                         isOpen={isOpen}
                         isActive={location.pathname === '/dashboard/access'}
+                    />
+                    <SidebarItem
+                        to="/dashboard/access/assign-role"
+                            icon={faPerson}
+                        label="Role manage"
+                        isOpen={isOpen}
+                        isActive={location.pathname === '/dashboard/access/assign-role'}
                     />
 
                     {/* Feed Management with Sub-Menu */}
