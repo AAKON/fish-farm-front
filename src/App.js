@@ -40,9 +40,7 @@ function App() {
                         <Route path="feed-stocks" element={<FeedStock />} />
                         <Route path="feed-management/stock" element={<FeedManagementStock />} />
                         <Route path="feed-management/report" element={<FeedManagementReport />} />
-                        <Route path="access" element={<RolePermissionPage  />}>
-
-                        </Route>
+                        <Route path="access/" element={<RolePermissionPage  />}/>
                         <Route path="access/assign-role" element={<AssignRole  />}/>
                     </Route>
                 </Routes>

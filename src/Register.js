@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function Register() {
     const [formData, setFormData] = useState({
@@ -8,7 +11,7 @@ function Register() {
         password: '',
     });
 
-    const [message, setMessage] = useState('');
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -21,10 +24,18 @@ function Register() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post(`${process.env.REACT_APP_BASE_URL}/api/auth/register`, formData);
-            setMessage(response.data.message);
+            await axios.post(`${process.env.REACT_APP_BASE_URL}/api/auth/register`, formData);
+            toast.success('Registration successful! Redirecting to login...', {
+                position: "top-center",
+                autoClose: 2000, // Automatically close after 2 seconds
+            });
+            setTimeout(() => {
+                navigate('/login'); // Redirect to the login page after successful registration
+            }, 2000); // Delay the redirect for 2 seconds to show the success message
         } catch (error) {
-            setMessage('Registration failed');
+            toast.error('Registration failed', {
+                position: "top-center",
+            });
         }
     };
 
@@ -70,7 +81,7 @@ function Register() {
                         Register
                     </button>
                 </form>
-                {message && <p className="mt-4 text-red-500 text-center">{message}</p>}
+                <ToastContainer />
             </div>
         </div>
     );
